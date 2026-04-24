@@ -1,0 +1,14 @@
+{
+  "_comment": "Do NOT commit secrets. Provide these values via environment variables (e.g. on Render).",
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=/data/portfolio.db"
+  },
+  "Jwt": {
+    "Key": "REPLACE_WITH_RANDOM_SECRET_MIN_32_CHARS_FOR_HS256",
+    "Issuer": "PortfolioApi",
+    "Audience": "PortfolioApp"
+  },
+  "Cors": {
+    "AllowedOrigin": "https://YOUR_APP.vercel.app"
+  }
+}

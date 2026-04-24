@@ -1,5 +1,4 @@
 using PortfolioApi.Domain.Entities;
-using PortfolioApi.Infrastructure.Persistence;
 
 namespace PortfolioApi.Infrastructure.Persistence;
 

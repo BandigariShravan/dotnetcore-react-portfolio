@@ -1,4 +1,4 @@
-namespace PortfolioApi.Models;
+namespace PortfolioApi.Domain.Entities;
 
 public class User
 {

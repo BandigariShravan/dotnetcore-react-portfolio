@@ -184,6 +184,50 @@ VITE_API_URL=http://localhost:5000/api
 
 ---
 
+## Deployment
+
+The app is deployed with the **backend on [Render](https://render.com)** (free tier, Docker) and the **frontend on [Vercel](https://vercel.com)** (free tier, CDN).
+
+### Backend — Render
+
+1. Push this repository to GitHub (if not already done).
+2. Go to **render.com → New → Blueprint** and connect the repository.  
+   Render will detect `render.yaml` and create the `portfolio-api` web service automatically.
+3. In the Render dashboard, set the following **environment variables** under the service's *Environment* tab:
+
+   | Variable | Description |
+   |---|---|
+   | `Jwt__Key` | Random secret, **minimum 32 characters** (256-bit for HS256) |
+   | `Cors__AllowedOrigin` | Your Vercel frontend URL, e.g. `https://my-portfolio.vercel.app` |
+
+4. Deploy — Render builds the Docker image and mounts a 1 GB persistent disk at `/data` for the SQLite database.
+
+> **Note:** The free tier spins down after inactivity; the first request after sleep may be slow.
+
+### Frontend — Vercel
+
+1. Go to **vercel.com → New Project** and import the same GitHub repository.
+2. Set the **Root Directory** to `frontend`.
+3. Add the following **Environment Variable** in the Vercel project settings:
+
+   | Variable | Value |
+   |---|---|
+   | `VITE_API_URL` | Your Render backend URL + `/api`, e.g. `https://portfolio-api.onrender.com/api` |
+
+4. Deploy — Vercel detects Vite automatically and builds the React app.  
+   The `frontend/vercel.json` file ensures React Router deep links work on page refresh.
+
+### CI (GitHub Actions)
+
+The `.github/workflows/ci.yml` workflow runs automatically on every push and pull request to `main`/`master`:
+
+- **Backend** — `dotnet restore` → `dotnet build`
+- **Frontend** — `npm ci` → `npm run lint` → `npm run build`
+
+No secrets are required for CI — only the two Render env vars and the one Vercel env var listed above need to be configured in their respective dashboards.
+
+---
+
 ## License
 
 MIT

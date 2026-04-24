@@ -25,7 +25,6 @@ export default function Admin() {
   const [saving, setSaving] = useState(false);
 
   const fetchProjects = () => {
-    setLoading(true);
     api.get('/projects')
       .then(res => setProjects(res.data))
       .catch(() => setError('Failed to load projects.'))

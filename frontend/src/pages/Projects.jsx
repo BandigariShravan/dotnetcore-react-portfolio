@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Container, Typography, Grid, TextField, Box, CircularProgress, Alert, InputAdornment, Chip, Stack } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ProjectCard from '../components/ProjectCard';
@@ -6,7 +6,6 @@ import api from '../api/axios';
 
 export default function Projects() {
   const [projects, setProjects] = useState([]);
-  const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
@@ -14,12 +13,12 @@ export default function Projects() {
 
   useEffect(() => {
     api.get('/projects')
-      .then(res => { setProjects(res.data); setFiltered(res.data); })
+      .then(res => { setProjects(res.data); })
       .catch(() => setError('Failed to load projects. Please try again.'))
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
+  const filtered = useMemo(() => {
     let result = projects;
     if (search) {
       result = result.filter(p =>
@@ -31,7 +30,7 @@ export default function Projects() {
     if (selectedTag) {
       result = result.filter(p => p.tags.toLowerCase().includes(selectedTag.toLowerCase()));
     }
-    setFiltered(result);
+    return result;
   }, [search, selectedTag, projects]);
 
   const allTags = [...new Set(projects.flatMap(p => p.tags.split(',').map(t => t.trim()).filter(Boolean)))];

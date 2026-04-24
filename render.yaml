@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: portfolio-api
+    runtime: docker
+    # Paths are relative to the repository root
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /api/projects
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      # ---------- required — set these in the Render dashboard ----------
+      # Jwt__Key  : random secret, minimum 32 characters
+      - key: Jwt__Key
+        sync: false
+      # Cors__AllowedOrigin : your Vercel frontend URL, e.g. https://my-portfolio.vercel.app
+      - key: Cors__AllowedOrigin
+        sync: false
+      # ------------------------------------------------------------------
+      - key: Jwt__Issuer
+        value: PortfolioApi
+      - key: Jwt__Audience
+        value: PortfolioApp
+      # Store the SQLite file on the persistent disk mounted at /data
+      - key: ConnectionStrings__DefaultConnection
+        value: Data Source=/data/portfolio.db
+    disk:
+      name: portfolio-data
+      mountPath: /data
+      sizeGB: 1

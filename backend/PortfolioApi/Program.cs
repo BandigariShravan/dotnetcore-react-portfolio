@@ -69,17 +69,10 @@ app.MapControllers();
 // Ensure the directory for the SQLite database file exists (e.g. /data on Render's persistent disk)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? "Data Source=portfolio.db";
-var dataSource = connectionString
-    .Split(';')
-    .Select(p => p.Trim())
-    .FirstOrDefault(p => p.StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase))
-    ?.Substring("Data Source=".Length);
-if (!string.IsNullOrWhiteSpace(dataSource))
-{
-    var dbDir = Path.GetDirectoryName(dataSource);
-    if (!string.IsNullOrWhiteSpace(dbDir))
-        Directory.CreateDirectory(dbDir);
-}
+var sqliteBuilder = new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder(connectionString);
+var dbDirectory = Path.GetDirectoryName(sqliteBuilder.DataSource);
+if (!string.IsNullOrWhiteSpace(dbDirectory))
+    Directory.CreateDirectory(dbDirectory);
 
 // Seed database
 using (var scope = app.Services.CreateScope())

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using PortfolioApi.Data;
-using PortfolioApi.Models;
+using PortfolioApi.Application.DTOs.Contact;
+using PortfolioApi.Application.Interfaces;
 
 namespace PortfolioApi.Controllers;
 
@@ -8,19 +8,17 @@ namespace PortfolioApi.Controllers;
 [Route("api/[controller]")]
 public class ContactController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IContactService _contactService;
 
-    public ContactController(AppDbContext context)
+    public ContactController(IContactService contactService)
     {
-        _context = context;
+        _contactService = contactService;
     }
 
     [HttpPost]
-    public async Task<IActionResult> Submit(ContactMessage message)
+    public async Task<IActionResult> Submit(ContactMessageDto dto)
     {
-        message.CreatedAt = DateTime.UtcNow;
-        _context.ContactMessages.Add(message);
-        await _context.SaveChangesAsync();
+        await _contactService.SubmitAsync(dto);
         return Ok(new { message = "Message sent successfully!" });
     }
 }

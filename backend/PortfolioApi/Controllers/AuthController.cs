@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PortfolioApi.Data;
-using PortfolioApi.Models;
-using PortfolioApi.Services;
+using PortfolioApi.Application.DTOs.Auth;
+using PortfolioApi.Application.Interfaces;
 
 namespace PortfolioApi.Controllers;
 
@@ -10,45 +8,34 @@ namespace PortfolioApi.Controllers;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly AppDbContext _context;
-    private readonly TokenService _tokenService;
+    private readonly IAuthService _authService;
 
-    public AuthController(AppDbContext context, TokenService tokenService)
+    public AuthController(IAuthService authService)
     {
-        _context = context;
-        _tokenService = tokenService;
+        _authService = authService;
     }
-
-    public record RegisterDto(string Username, string Email, string Password);
-    public record LoginDto(string Username, string Password);
 
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterDto dto)
     {
-        if (await _context.Users.AnyAsync(u => u.Username == dto.Username))
-            return BadRequest(new { message = "Username already exists" });
-
-        var user = new User
+        try
         {
-            Username = dto.Username,
-            Email = dto.Email,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-            Role = "viewer"
-        };
-
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
-
-        return Ok(new { token = _tokenService.CreateToken(user), username = user.Username, role = user.Role });
+            var result = await _authService.RegisterAsync(dto);
+            return Ok(new { token = result.Token, username = result.Username, role = result.Role });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginDto dto)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == dto.Username);
-        if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+        var result = await _authService.LoginAsync(dto);
+        if (result is null)
             return Unauthorized(new { message = "Invalid credentials" });
 
-        return Ok(new { token = _tokenService.CreateToken(user), username = user.Username, role = user.Role });
+        return Ok(new { token = result.Token, username = result.Username, role = result.Role });
     }
 }

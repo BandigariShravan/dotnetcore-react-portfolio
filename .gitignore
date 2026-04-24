@@ -1,6 +1,12 @@
 # .NET
 backend/PortfolioApi/bin/
 backend/PortfolioApi/obj/
+backend/PortfolioApi.Domain/bin/
+backend/PortfolioApi.Domain/obj/
+backend/PortfolioApi.Application/bin/
+backend/PortfolioApi.Application/obj/
+backend/PortfolioApi.Infrastructure/bin/
+backend/PortfolioApi.Infrastructure/obj/
 *.db
 *.db-shm
 *.db-wal

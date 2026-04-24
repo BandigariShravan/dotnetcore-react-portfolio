@@ -25,7 +25,3 @@ services:
       # Store the SQLite file on the persistent disk mounted at /data
       - key: ConnectionStrings__DefaultConnection
         value: Data Source=/data/portfolio.db
-    disk:
-      name: portfolio-data
-      mountPath: /data
-      sizeGB: 1

@@ -6,7 +6,28 @@ import {
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CodeIcon from '@mui/icons-material/Code';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
+
+function NavButtons({ navLinks, user, handleLogout }) {
+  return (
+    <>
+      {navLinks.map((link) => (
+        <Button key={link.path} color="inherit" component={Link} to={link.path} sx={{ mx: 0.5 }}>
+          {link.label}
+        </Button>
+      ))}
+      {user ? (
+        <Button color="inherit" onClick={handleLogout} variant="outlined" sx={{ ml: 1, borderColor: 'rgba(255,255,255,0.5)' }}>
+          Logout ({user.username})
+        </Button>
+      ) : (
+        <Button color="inherit" component={Link} to="/login" variant="outlined" sx={{ ml: 1, borderColor: 'rgba(255,255,255,0.5)' }}>
+          Login
+        </Button>
+      )}
+    </>
+  );
+}
 
 export default function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -27,25 +48,6 @@ export default function Navbar() {
     ...(isAdmin ? [{ label: 'Admin', path: '/admin' }] : []),
   ];
 
-  const NavButtons = () => (
-    <>
-      {navLinks.map((link) => (
-        <Button key={link.path} color="inherit" component={Link} to={link.path} sx={{ mx: 0.5 }}>
-          {link.label}
-        </Button>
-      ))}
-      {user ? (
-        <Button color="inherit" onClick={handleLogout} variant="outlined" sx={{ ml: 1, borderColor: 'rgba(255,255,255,0.5)' }}>
-          Logout ({user.username})
-        </Button>
-      ) : (
-        <Button color="inherit" component={Link} to="/login" variant="outlined" sx={{ ml: 1, borderColor: 'rgba(255,255,255,0.5)' }}>
-          Login
-        </Button>
-      )}
-    </>
-  );
-
   return (
     <>
       <AppBar position="sticky" sx={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)' }}>
@@ -59,7 +61,7 @@ export default function Navbar() {
               <MenuIcon />
             </IconButton>
           ) : (
-            <Box><NavButtons /></Box>
+            <Box><NavButtons navLinks={navLinks} user={user} handleLogout={handleLogout} /></Box>
           )}
         </Toolbar>
       </AppBar>

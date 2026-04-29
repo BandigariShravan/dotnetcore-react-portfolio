@@ -1,14 +1,24 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using PortfolioApi.Application;
 using PortfolioApi.Infrastructure;
 using PortfolioApi.Infrastructure.Persistence;
+using PortfolioApi.Middleware;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, loggerConfiguration) =>
+    loggerConfiguration
+        .ReadFrom.Configuration(context.Configuration)
+        .WriteTo.Console());
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddApplication();
 
 // Infrastructure (repositories, services, DbContext)
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -61,6 +71,8 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+app.UseSerilogRequestLogging();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();

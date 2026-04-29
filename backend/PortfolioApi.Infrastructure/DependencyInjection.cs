@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PortfolioApi.Application.Interfaces;
+using PortfolioApi.Application.Interfaces.Persistence;
 using PortfolioApi.Application.Services;
 using PortfolioApi.Domain.Interfaces;
 using PortfolioApi.Infrastructure.Persistence;
@@ -23,7 +24,8 @@ public static class DependencyInjection
 
         // Repositories
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IProjectRepository, ProjectRepository>();
+        services.AddScoped<PortfolioApi.Domain.Interfaces.IProjectRepository, ProjectRepository>();
+        services.AddScoped<PortfolioApi.Application.Interfaces.Persistence.IProjectRepository, ProjectRepository>();
         services.AddScoped<IContactRepository, ContactRepository>();
 
         // Infrastructure services
@@ -31,7 +33,6 @@ public static class DependencyInjection
 
         // Application services
         services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<IProjectService, ProjectService>();
         services.AddScoped<IContactService, ContactService>();
 
         return services;

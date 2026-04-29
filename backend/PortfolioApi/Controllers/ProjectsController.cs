@@ -1,7 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MediatR;
 using PortfolioApi.Application.DTOs.Projects;
-using PortfolioApi.Application.Interfaces;
+using PortfolioApi.Application.Features.Projects.Commands.CreateProject;
+using PortfolioApi.Application.Features.Projects.Commands.DeleteProject;
+using PortfolioApi.Application.Features.Projects.Commands.UpdateProject;
+using PortfolioApi.Application.Features.Projects.Queries.GetProjectById;
+using PortfolioApi.Application.Features.Projects.Queries.GetProjects;
 
 namespace PortfolioApi.Controllers;
 
@@ -9,24 +14,24 @@ namespace PortfolioApi.Controllers;
 [Route("api/[controller]")]
 public class ProjectsController : ControllerBase
 {
-    private readonly IProjectService _projectService;
+    private readonly ISender _sender;
 
-    public ProjectsController(IProjectService projectService)
+    public ProjectsController(ISender sender)
     {
-        _projectService = projectService;
+        _sender = sender;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var projects = await _projectService.GetAllAsync();
+        var projects = await _sender.Send(new GetProjectsQuery());
         return Ok(projects);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var project = await _projectService.GetByIdAsync(id);
+        var project = await _sender.Send(new GetProjectByIdQuery(id));
         if (project is null) return NotFound();
         return Ok(project);
     }
@@ -35,7 +40,16 @@ public class ProjectsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(CreateProjectDto dto)
     {
-        var created = await _projectService.CreateAsync(dto);
+        var command = new CreateProjectCommand(
+            dto.Title,
+            dto.Description,
+            dto.Stack,
+            dto.DemoUrl,
+            dto.GitHubUrl,
+            dto.ImageUrl,
+            dto.Tags);
+
+        var created = await _sender.Send(command);
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
@@ -45,7 +59,17 @@ public class ProjectsController : ControllerBase
     {
         if (id != dto.Id) return BadRequest();
 
-        var updated = await _projectService.UpdateAsync(id, dto);
+        var command = new UpdateProjectCommand(
+            dto.Id,
+            dto.Title,
+            dto.Description,
+            dto.Stack,
+            dto.DemoUrl,
+            dto.GitHubUrl,
+            dto.ImageUrl,
+            dto.Tags);
+
+        var updated = await _sender.Send(command);
         if (!updated) return NotFound();
 
         return NoContent();
@@ -55,7 +79,7 @@ public class ProjectsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var deleted = await _projectService.DeleteAsync(id);
+        var deleted = await _sender.Send(new DeleteProjectCommand(id));
         if (!deleted) return NotFound();
 
         return NoContent();

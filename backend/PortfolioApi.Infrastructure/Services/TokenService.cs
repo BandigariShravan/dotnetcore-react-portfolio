@@ -27,9 +27,14 @@ public class TokenService : ITokenService
             new Claim(ClaimTypes.Role, user.Role)
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-            _config["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured")));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+        var jwtKey = _config["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured");
+        var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
+
+        if (keyBytes.Length <= 32)
+            throw new InvalidOperationException("JWT Key must be longer than 32 bytes for HS256.");
+
+        var key = new SymmetricSecurityKey(keyBytes);
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {

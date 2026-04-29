@@ -1,11 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using PortfolioApi.Domain.Entities;
-using PortfolioApi.Domain.Interfaces;
 using PortfolioApi.Infrastructure.Persistence;
 
 namespace PortfolioApi.Infrastructure.Persistence.Repositories;
 
-public class ProjectRepository : IProjectRepository
+public class ProjectRepository : PortfolioApi.Application.Interfaces.Persistence.IProjectRepository, PortfolioApi.Domain.Interfaces.IProjectRepository
 {
     private readonly AppDbContext _context;
 
